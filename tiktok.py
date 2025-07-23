@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class TikTokViewBot:
     TOOL_API_URL = "https://buf-view-tiktok-ayacte.vercel.app/tiktokview"
-    MAX_WORKERS = 1000
+    MAX_WORKERS = 500
 
     def __init__(self, urls):
         self.urls = urls
