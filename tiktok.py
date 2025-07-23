@@ -61,7 +61,7 @@ class TikTokViewBot:
                     fail += 1
         return success, fail
 
-    def run(self, batch_size=1000, delay=5):
+    def run(self, batch_size=100, delay=5):
         while True:
             for url in self.urls:
                 success, fail = self._process_batch(url, batch_size)
