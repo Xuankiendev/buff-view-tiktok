@@ -1,51 +1,43 @@
 import time
-import httpx
-import random
+import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class TikTokViewBot:
     TOOL_API_URL = "https://buf-view-tiktok-ayacte.vercel.app/tiktokview"
     MAX_WORKERS = 500
 
-    def __init__(self, urls, proxies=None):
+    def __init__(self, urls):
         self.urls = urls
-        self.proxies = proxies
-
-    def _random_headers(self):
-        user_agents = [
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1 Safari/605.1.15",
-            "Mozilla/5.0 (Linux; Android 13; Pixel 6 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36"
-        ]
-        return {
-            "User-Agent": random.choice(user_agents),
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
-            "Upgrade-Insecure-Requests": "1",
-            "Sec-Fetch-Site": "none",
-            "Sec-Fetch-Mode": "navigate",
-            "Sec-Fetch-User": "?1",
-            "Sec-Fetch-Dest": "document",
-            "Connection": "keep-alive",
-        }
 
     def _send_request(self, url):
-        proxy = random.choice(self.proxies) if self.proxies else None
-        proxies = {
-            "http://": f"http://{proxy}",
-            "https://": f"http://{proxy}",
-        } if proxy else None
-
         try:
-            with httpx.Client(http2=True, proxies=proxies, timeout=30) as client:
-                response = client.get(
-                    self.TOOL_API_URL,
-                    headers=self._random_headers(),
-                    params={"video": url, "time": int(time.time())},
-                )
-                if response.status_code == 200 and response.json().get("sent_success", 0) > 0:
-                    return True
+            headers = {
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
+                "Cache-Control": "max-age=0",
+                "Referer": "https://buf-view-tiktok-ayacte.vercel.app/tiktokview",
+                "Sec-Ch-Ua": '"Chromium";v="137", "Not/A)Brand";v="24"',
+                "Sec-Ch-Ua-Mobile": "?0",
+                "Sec-Ch-Ua-Platform": '"Linux"',
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "same-origin",
+                "Upgrade-Insecure-Requests": "1",
+                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+            }
+            cookies = {
+                "_vcrcs": "1.17532602183.3600.ZjhkMzg5M...f9f253f4eda4036d29c89a6936d17f71"
+            }
+            response = requests.get(
+                self.TOOL_API_URL,
+                params={"video": url},
+                headers=headers,
+                cookies=cookies,
+                timeout=30
+            )
+            if response.status_code == 200 and response.json().get("sent_success", 0) > 0:
+                return True
         except:
             pass
         return False
@@ -61,7 +53,7 @@ class TikTokViewBot:
                     fail += 1
         return success, fail
 
-    def run(self, batch_size=100, delay=5):
+    def run(self, batch_size=1000, delay=5):
         while True:
             for url in self.urls:
                 success, fail = self._process_batch(url, batch_size)
@@ -75,18 +67,10 @@ def load_urls(file_path):
     except:
         return []
 
-def load_proxies(file_path):
-    try:
-        with open(file_path, "r") as f:
-            return [line.strip() for line in f if line.strip()]
-    except:
-        return []
-
 if __name__ == "__main__":
     urls = load_urls("links.txt")
-    proxies = load_proxies("proxy.txt")
     if not urls:
         print("Không tìm thấy link hợp lệ trong links.txt")
     else:
-        bot = TikTokViewBot(urls, proxies)
+        bot = TikTokViewBot(urls)
         bot.run()
