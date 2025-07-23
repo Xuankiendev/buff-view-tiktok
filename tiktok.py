@@ -11,9 +11,25 @@ class TikTokViewBot:
 
     def _send_request(self, url):
         try:
+            headers = {
+                "Host": "buf-view-tiktok-ayacte.vercel.app",
+                "Connection": "keep-alive",
+                "Cache-Control": "max-age=0",
+                "Upgrade-Insecure-Requests": "1",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept-Language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
+                "Sec-Fetch-Site": "none",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-User": "?1",
+                "Sec-Fetch-Dest": "document",
+            }
+            params = {"video": url, "time": int(time.time())}
             response = requests.get(
                 self.TOOL_API_URL,
-                params={"video": url},
+                headers=headers,
+                params=params,
                 timeout=30
             )
             if response.status_code == 200 and response.json().get("sent_success", 0) > 0:
